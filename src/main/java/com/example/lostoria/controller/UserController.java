@@ -23,10 +23,15 @@ public class UserController {
     }
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User loginRequest){
+
         Optional<User> user = userService.findByUsername(loginRequest.getUsername());
-        if (user.isPresent())
+
+        if (!user.isPresent())
+            user = userService.findByEmail(loginRequest.getEmail());
+
+        if (user.isPresent()) {
             return new ResponseEntity<>("login success", HttpStatus.OK);
-        else
+        }else
             return new ResponseEntity<>("Invalid Username", HttpStatus.UNAUTHORIZED);
     }
 

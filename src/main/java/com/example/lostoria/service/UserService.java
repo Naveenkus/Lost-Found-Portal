@@ -15,7 +15,7 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private  PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     public User registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
@@ -25,7 +25,9 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
-
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -46,4 +48,5 @@ public class UserService {
     public void deleteUser(long id) {
         userRepository.deleteById(id);
     }
+
 }
