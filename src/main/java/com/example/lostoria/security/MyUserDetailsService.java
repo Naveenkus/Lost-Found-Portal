@@ -1,7 +1,7 @@
-package com.example.lostoria.service;
+package com.example.lostoria.security;
 
 import com.example.lostoria.model.User;
-import com.example.lostoria.model.UserPrincipal;
+import com.example.lostoria.dto.UserPrincipal;
 import com.example.lostoria.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

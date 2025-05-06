@@ -1,5 +1,6 @@
-package com.example.lostoria.model;
+package com.example.lostoria.dto;
 
+import com.example.lostoria.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

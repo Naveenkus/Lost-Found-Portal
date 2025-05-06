@@ -16,25 +16,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    //---------COMMON USER---------//
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user){
-        return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
-    }
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User loginRequest){
-
-        Optional<User> user = userService.findByUsername(loginRequest.getUsername());
-
-        if (!user.isPresent())
-            user = userService.findByEmail(loginRequest.getEmail());
-
-        if (user.isPresent()) {
-            return new ResponseEntity<>("login success", HttpStatus.OK);
-        }else
-            return new ResponseEntity<>("Invalid Username", HttpStatus.UNAUTHORIZED);
-    }
-
     //--------ADMIN------//
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers(){
