@@ -1,14 +1,13 @@
 package com.example.lostoria.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -25,6 +24,9 @@ public class FoundItem {
     private String status;
     private LocalDateTime dateFound;
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "foundItem", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
     public Long getId() {
         return id;
