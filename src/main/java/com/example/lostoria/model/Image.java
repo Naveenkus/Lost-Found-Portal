@@ -21,7 +21,7 @@ public class Image {
     @Lob
     private byte[] imageDate;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "lost_item_id")
     private LostItem lostItem;
 
@@ -59,5 +59,21 @@ public class Image {
 
     public void setImageDate(byte[] imageDate) {
         this.imageDate = imageDate;
+    }
+
+    public LostItem getLostItem() {
+        return lostItem;
+    }
+
+    public void setLostItem(LostItem lostItem) {
+        this.lostItem = lostItem;
+    }
+
+    public FoundItem getFoundItem() {
+        return foundItem;
+    }
+
+    public void setFoundItem(FoundItem foundItem) {
+        this.foundItem = foundItem;
     }
 }

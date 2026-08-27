@@ -20,13 +20,11 @@ public class LostItem {
     private String title;
     private String description;
     private String locationLost;
-    private String imageUrl;
     private String status;
     private LocalDateTime datelost;
     private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "lostItem", cascade = CascadeType.ALL)
-    private List<Image> images = new ArrayList<>();
+    @OneToOne(mappedBy = "lostItem", cascade = CascadeType.ALL)
+    private Image images;
 
     public Long getId() {
         return id;
@@ -60,14 +58,6 @@ public class LostItem {
         this.locationLost = locationLost;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -90,5 +80,13 @@ public class LostItem {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Image getImages() {
+        return images;
+    }
+
+    public void setImages(Image images) {
+        this.images = images;
     }
 }
