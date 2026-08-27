@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -18,29 +20,24 @@ public class AuthController {
 
     //---------COMMON USER---------//
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user){
-        return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
+    public ResponseEntity<?> register(@RequestBody User user){
+        User createdUser = userService.registerUser(user);
+        createdUser.setPassword(null); // Never leak password in response
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User loginRequest){
-
-//        Optional<User> user = userService.findByUsername(loginRequest.getUsername());
-//
-//        if (!user.isPresent())
-//            user = userService.findByEmail(loginRequest.getEmail());
-//
-//        if (user.isPresent()) {
-//            return new ResponseEntity<>("login success", HttpStatus.OK);
-//        }else
-//            return new ResponseEntity<>("Invalid Username", HttpStatus.UNAUTHORIZED);
-        return new ResponseEntity<>(userService.verify(loginRequest), HttpStatus.OK);
-
-//        String token = userService.verify(loginRequest);
-//        if (!"fail".equals(token)) {
-//            return new ResponseEntity<>(token, HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
-//        }
+    public ResponseEntity<?> login(@RequestBody User loginRequest){
+        String token = userService.verify(loginRequest);
+        if (!"fail".equals(token) && token != null) {
+            return ResponseEntity.ok(Map.of(
+                "token", token,
+                "message", "Login successful"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "message", "Invalid username/email or password"
+            ));
+        }
     }
-
 }

@@ -7,6 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -28,16 +32,22 @@ public class FoundItemController {
             return new ResponseEntity<>(foundItem, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FoundItem> createWithImage(
+            @ModelAttribute FoundItem foundItem,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) throws IOException {
+        return new ResponseEntity<>(foundItemService.create(foundItem, imageFile), HttpStatus.CREATED);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FoundItem> create(@RequestBody FoundItem foundItem){
-        return new ResponseEntity<>(foundItemService.create(foundItem), HttpStatus.OK);
+        return new ResponseEntity<>(foundItemService.create(foundItem), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable long id, @RequestBody FoundItem foundItem){
-        FoundItem foundItem1 = null;
-        foundItem1 = foundItemService.update(id, foundItem);
-        if (foundItem != null)
+        FoundItem updated = foundItemService.update(id, foundItem);
+        if (updated != null)
             return new ResponseEntity<>("Updated", HttpStatus.OK);
         else
             return new ResponseEntity<>("Failed to update", HttpStatus.BAD_REQUEST);

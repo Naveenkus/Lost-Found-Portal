@@ -1,12 +1,17 @@
 package com.example.lostoria.service;
 
 import com.example.lostoria.model.FoundItem;
+import com.example.lostoria.model.Image;
 import com.example.lostoria.repository.FoundItemRepository;
+import com.example.lostoria.repository.ImageRepository;
+import com.example.lostoria.util.ImageUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -14,7 +19,8 @@ import java.util.List;
 public class FoundItemService {
     @Autowired
     private FoundItemRepository foundItemRepository;
-
+    @Autowired
+    private ImageRepository imageRepository;
 
     public List<FoundItem> getAll() {
         return foundItemRepository.findAll();
@@ -25,7 +31,28 @@ public class FoundItemService {
     }
 
     public FoundItem create(FoundItem foundItem) {
+        if (foundItem.getCreatedAt() == null) {
+            foundItem.setCreatedAt(LocalDateTime.now());
+        }
         return foundItemRepository.save(foundItem);
+    }
+
+    public FoundItem create(FoundItem foundItem, MultipartFile imageFile) throws IOException {
+        if (foundItem.getCreatedAt() == null) {
+            foundItem.setCreatedAt(LocalDateTime.now());
+        }
+        FoundItem savedItem = foundItemRepository.save(foundItem);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Image image = Image.builder()
+                    .imageName(imageFile.getOriginalFilename())
+                    .type(imageFile.getContentType())
+                    .imageDate(ImageUtility.compress(imageFile.getBytes()))
+                    .foundItem(savedItem)
+                    .build();
+            Image savedImage = imageRepository.save(image);
+            savedItem.getImages().add(savedImage);
+        }
+        return savedItem;
     }
 
     public FoundItem update(long id, FoundItem newData) {
@@ -35,13 +62,13 @@ public class FoundItemService {
             item.setLocationFound(newData.getLocationFound());
             item.setImageUrl(newData.getImageUrl());
             item.setStatus(newData.getStatus());
-            item.setCreatedAt(newData.getCreatedAt());
             item.setDateFound(newData.getDateFound());
             return foundItemRepository.save(item);
-        }).orElseThrow(() -> new RuntimeException(" No Item not found"));
+        }).orElseThrow(() -> new RuntimeException("Found Item not found"));
     }
 
     public void delete(long id) {
         foundItemRepository.deleteById(id);
     }
 }
+

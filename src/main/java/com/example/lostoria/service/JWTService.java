@@ -8,11 +8,10 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -20,18 +19,11 @@ import java.util.function.Function;
 public class JWTService {
     @Autowired
     private UserRepository userRepository;
-    private String secretKey = "";
-//    private final long expirationTime = 86400000;
+
+    @Value("${jwt.secret:dGhpc2lzYXNlY3JldGtleWZvcmp3dHRva2VuZ2VuZXJhdGlvbmlubG9zdG9yaWFwcm9qZWN0MjAyNg}")
+    private String secretKey;
 
     public JWTService() {
-
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk =keyGen.generateKey();
-            secretKey = Encoders.BASE64URL.encode(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String generateToken(String identifier) {

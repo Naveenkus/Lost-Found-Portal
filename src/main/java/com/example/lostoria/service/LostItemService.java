@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,24 +22,32 @@ public class LostItemService {
     private LostItemRepository lostItemRepository;
     @Autowired
     private ImageRepository imageRepository;
+
     public List<LostItem> getAll() {
         return lostItemRepository.findAll();
     }
+
     public LostItem getById(Long id) {
         return lostItemRepository.findById(id).orElse(null);
     }
-    public LostItem create(LostItem lostItem, MultipartFile imageFile) throws IOException {
 
-//        MultipartFile imageFile = (MultipartFile) lostItem.getImages();
-        if (imageFile != null && !imageFile.isEmpty()){
-            Image image = new Image();
-            image.setImageName(imageFile.getOriginalFilename());
-            image.setImageDate(imageFile.getBytes());
-            image.setType(imageFile.getContentType());
-            image.setLostItem(lostItem);
-            imageRepository.save(image);
+    public LostItem create(LostItem lostItem, MultipartFile imageFile) throws IOException {
+        if (lostItem.getCreatedAt() == null) {
+            lostItem.setCreatedAt(LocalDateTime.now());
         }
-        return lostItemRepository.save(lostItem);
+        LostItem savedItem = lostItemRepository.save(lostItem);
+
+        if (imageFile != null && !imageFile.isEmpty()){
+            Image image = Image.builder()
+                    .imageName(imageFile.getOriginalFilename())
+                    .imageDate(com.example.lostoria.util.ImageUtility.compress(imageFile.getBytes()))
+                    .type(imageFile.getContentType())
+                    .lostItem(savedItem)
+                    .build();
+            Image savedImage = imageRepository.save(image);
+            savedItem.setImages(savedImage);
+        }
+        return savedItem;
     }
 
     public LostItem update(long id, LostItem newData) {
@@ -46,9 +55,7 @@ public class LostItemService {
             item.setTitle(newData.getTitle());
             item.setDescription(newData.getDescription());
             item.setLocationLost(newData.getLocationLost());
-//            item.setImageUrl(newData.getImageUrl());
             item.setStatus(newData.getStatus());
-            item.setCreatedAt(newData.getCreatedAt());
             item.setDatelost(newData.getDatelost());
             return lostItemRepository.save(item);
         }).orElseThrow(() -> new RuntimeException("Lost Item not found"));

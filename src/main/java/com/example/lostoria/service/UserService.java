@@ -58,30 +58,24 @@ public class UserService {
     }
 
     public String verify(User user){
-        String identifier = user.getUsername();
-        Optional<User> user1 = userRepository.findByUsername(identifier);
-        if (!user1.isPresent()) {
-            user1 = userRepository.findByEmail(identifier);
-            Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-            if (authentication.isAuthenticated()){
-                return jwtService.generateToken(user.getEmail());
-            }
-        }else {
-            Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-            if (authentication.isAuthenticated()){
-                return jwtService.generateToken(user.getUsername());
-            }
+        String identifier = user.getUsername() != null && !user.getUsername().trim().isEmpty()
+                ? user.getUsername()
+                : user.getEmail();
+
+        if (identifier == null || identifier.trim().isEmpty() || user.getPassword() == null) {
+            return "fail";
         }
-//        if (user1.isPresent()){
-//            User existingUser = user1.get();
-//            if (passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-//                return jwtService.generateToken(existingUser.getUsername());
-//            }
-//        }
-//        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-//        if (authentication.isAuthenticated()){
-//            return jwtService.generateToken(user.getUsername());
-//        }
+
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(identifier, user.getPassword())
+            );
+            if (authentication.isAuthenticated()){
+                return jwtService.generateToken(identifier);
+            }
+        } catch (Exception e) {
+            return "fail";
+        }
 
         return "fail";
     }

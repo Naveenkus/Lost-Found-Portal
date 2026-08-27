@@ -34,16 +34,15 @@ public class LostItemController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LostItem> create(
             @ModelAttribute LostItem lostItem,
-            @RequestPart("image") MultipartFile imageFile) throws IOException {
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) throws IOException {
 
-        return new ResponseEntity<>(lostItemService.create(lostItem, imageFile), HttpStatus.OK);
+        return new ResponseEntity<>(lostItemService.create(lostItem, imageFile), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable long id, @RequestBody LostItem lostItem){
-        LostItem lostItem1 = null;
-        lostItem1 = lostItemService.update(id, lostItem);
-        if (lostItem != null){
+        LostItem updated = lostItemService.update(id, lostItem);
+        if (updated != null){
             return new ResponseEntity<>("Updated", HttpStatus.OK);
         }else
             return new ResponseEntity<>("Failed to update", HttpStatus.BAD_REQUEST);
