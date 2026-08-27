@@ -1,0 +1,104 @@
+import React from 'react';
+import { X, MapPin, Calendar, Image as ImageIcon, ShieldCheck, Tag } from 'lucide-react';
+import { api } from '../api';
+
+export default function ItemModal({ item, type, onClose }) {
+  if (!item) return null;
+
+  const isLost = type === 'LOST';
+
+  let imageName = null;
+  if (item.images) {
+    if (Array.isArray(item.images) && item.images.length > 0) {
+      imageName = item.images[0].imageName;
+    } else if (typeof item.images === 'object' && item.images.imageName) {
+      imageName = item.images.imageName;
+    }
+  }
+
+  const imageUrl = imageName ? api.getImageUrl(imageName) : null;
+  const dateValue = isLost ? (item.datelost || item.createdAt) : (item.dateFound || item.createdAt);
+  const locationText = isLost ? item.locationLost : item.locationFound;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content item-modal-card" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close-btn" onClick={onClose}>
+          <X size={20} />
+        </button>
+
+        <div className="item-modal-layout">
+          {/* Image Showcase */}
+          <div className="item-modal-media">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={item.title}
+                className="modal-preview-img"
+              />
+            ) : (
+              <div className="modal-no-img">
+                <ImageIcon size={48} className="text-slate-500" />
+                <span>No Photo Uploaded</span>
+              </div>
+            )}
+          </div>
+
+          {/* Details Column */}
+          <div className="item-modal-details">
+            <div className="modal-header-badges">
+              <span className={`badge ${isLost ? 'badge-lost' : 'badge-found'}`}>
+                {isLost ? 'LOST ITEM' : 'FOUND ITEM'}
+              </span>
+              <span className="badge badge-status">
+                {item.status || (isLost ? 'UNRESOLVED' : 'AVAILABLE')}
+              </span>
+            </div>
+
+            <h2 className="modal-item-title">{item.title}</h2>
+
+            <div className="item-metadata-list">
+              <div className="meta-item">
+                <MapPin size={18} className="meta-item-icon text-indigo-400" />
+                <div>
+                  <span className="meta-label">Reported Location</span>
+                  <p className="meta-value">{locationText || 'Not specified'}</p>
+                </div>
+              </div>
+
+              <div className="meta-item">
+                <Calendar size={18} className="meta-item-icon text-emerald-400" />
+                <div>
+                  <span className="meta-label">Date Recorded</span>
+                  <p className="meta-value">
+                    {dateValue ? new Date(dateValue).toLocaleString() : 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="meta-item">
+                <Tag size={18} className="meta-item-icon text-rose-400" />
+                <div>
+                  <span className="meta-label">Item Reference ID</span>
+                  <p className="meta-value">#{item.id}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-item-description">
+              <h3>Description & Notes</h3>
+              <p>{item.description || 'No specific notes or additional descriptions provided by the reporter.'}</p>
+            </div>
+
+            <div className="modal-claim-box">
+              <ShieldCheck size={20} className="text-emerald-400 shrink-0" />
+              <p>
+                To claim or submit proof of ownership for this item, please visit the campus security office or contact the portal administrator with Reference #{item.id}.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

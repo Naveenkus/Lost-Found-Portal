@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/", "/index.html", "/static/**", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
+                        .requestMatchers("/", "/index.html", "/assets/**", "/static/**", "/css/**", "/js/**", "/favicon.ico", "/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/images/view/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/lost-items/**").permitAll()
