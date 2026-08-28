@@ -20,7 +20,7 @@ public class JWTService {
     @Autowired
     private UserRepository userRepository;
 
-    @Value("${jwt.secret:dGhpc2lzYXNlY3JldGtleWZvcmp3dHRva2VuZ2VuZXJhdGlvbmlubG9zdG9yaWFwcm9qZWN0MjAyNg}")
+    @Value("${jwt.secret:}")
     private String secretKey;
 
     public JWTService() {
