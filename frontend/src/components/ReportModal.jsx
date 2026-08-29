@@ -51,12 +51,14 @@ export default function ReportModal({ defaultType = 'LOST', onClose, onSuccess, 
       formData.append('description', description.trim());
       formData.append('status', reportType);
 
+      const formattedDate = date ? (date.length === 16 ? `${date}:00` : date) : new Date().toISOString().slice(0, 19);
+
       if (reportType === 'LOST') {
         formData.append('locationLost', location.trim());
-        formData.append('datelost', new Date(date).toISOString().slice(0, 19));
+        formData.append('datelost', formattedDate);
       } else {
         formData.append('locationFound', location.trim());
-        formData.append('dateFound', new Date(date).toISOString().slice(0, 19));
+        formData.append('dateFound', formattedDate);
       }
 
       if (imageFile) {
