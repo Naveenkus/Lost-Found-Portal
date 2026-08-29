@@ -8,6 +8,7 @@ import com.example.lostoria.util.ImageUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,10 +23,12 @@ public class FoundItemService {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Transactional(readOnly = true)
     public List<FoundItem> getAll() {
         return foundItemRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public FoundItem getById(long id) {
         return foundItemRepository.findById(id).orElse(null);
     }
@@ -37,6 +40,7 @@ public class FoundItemService {
         return foundItemRepository.save(foundItem);
     }
 
+    @Transactional
     public FoundItem create(FoundItem foundItem, MultipartFile imageFile) throws IOException {
         if (foundItem.getCreatedAt() == null) {
             foundItem.setCreatedAt(LocalDateTime.now());

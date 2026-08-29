@@ -25,7 +25,7 @@ public class FoundItem {
     private LocalDateTime dateFound;
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "foundItem", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "foundItem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Image> images = new ArrayList<>();
 
     public Long getId() {

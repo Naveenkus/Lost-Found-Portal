@@ -5,9 +5,9 @@ import com.example.lostoria.model.Image;
 import com.example.lostoria.model.LostItem;
 import com.example.lostoria.repository.ImageRepository;
 import com.example.lostoria.util.ImageUtility;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepo;
 
-
+    @Transactional
     public Image saveImage(MultipartFile imageFile, LostItem lostItem, FoundItem foundItem) throws IOException {
 
         Image image = Image.builder()
@@ -31,9 +31,12 @@ public class ImageService {
         return imageRepo.save(image);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Image> getImageByName(String name) {
         return imageRepo.findByImageName(name);
     }
+
+    @Transactional(readOnly = true)
     public byte[] getImageData(String name) throws IOException {
         Optional<Image> dbImage = imageRepo.findByImageName(name);
         return ImageUtility.decompressImage(dbImage.get().getImageDate());

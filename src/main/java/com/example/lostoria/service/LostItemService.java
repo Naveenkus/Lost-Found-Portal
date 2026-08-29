@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,14 +24,17 @@ public class LostItemService {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Transactional(readOnly = true)
     public List<LostItem> getAll() {
         return lostItemRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public LostItem getById(Long id) {
         return lostItemRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public LostItem create(LostItem lostItem, MultipartFile imageFile) throws IOException {
         if (lostItem.getCreatedAt() == null) {
             lostItem.setCreatedAt(LocalDateTime.now());

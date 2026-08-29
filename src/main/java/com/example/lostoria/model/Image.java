@@ -1,5 +1,6 @@
 package com.example.lostoria.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,10 +22,12 @@ public class Image {
     @Lob
     private byte[] imageDate;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "lost_item_id")
     private LostItem lostItem;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "found_item_id")
     private FoundItem foundItem;
