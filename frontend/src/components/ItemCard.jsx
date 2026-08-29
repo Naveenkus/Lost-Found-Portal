@@ -5,17 +5,17 @@ import { api } from '../api';
 export default function ItemCard({ item, type, onClick }) {
   const isLost = type === 'LOST';
 
-  // Resolve image name
-  let imageName = null;
+  // Resolve image ID
+  let imageId = null;
   if (item.images) {
     if (Array.isArray(item.images) && item.images.length > 0) {
-      imageName = item.images[0].imageName;
-    } else if (typeof item.images === 'object' && item.images.imageName) {
-      imageName = item.images.imageName;
+      imageId = item.images[0].imageID;
+    } else if (typeof item.images === 'object' && item.images.imageID) {
+      imageId = item.images.imageID;
     }
   }
 
-  const imageUrl = imageName ? api.getImageUrl(imageName) : null;
+  const imageUrl = imageId ? api.getImageUrl(imageId) : null;
   const dateValue = isLost ? (item.datelost || item.createdAt) : (item.dateFound || item.createdAt);
   
   const formattedDate = dateValue 

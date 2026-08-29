@@ -105,8 +105,8 @@ export const api = {
   },
 
   // Image URL Helper
-  getImageUrl(imageName) {
-    if (!imageName) return null;
-    return `${API_BASE}/images/view/${encodeURIComponent(imageName)}`;
+  getImageUrl(imageId) {
+    if (!imageId) return null;
+    return `${API_BASE}/images/view/id/${imageId}`;
   }
 };

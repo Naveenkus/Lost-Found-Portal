@@ -32,13 +32,14 @@ public class ImageService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Image> getImageByName(String name) {
-        return imageRepo.findByImageName(name);
+    public Optional<Image> getImageById(long id) {
+        return imageRepo.findById(id);
     }
 
     @Transactional(readOnly = true)
-    public byte[] getImageData(String name) throws IOException {
-        Optional<Image> dbImage = imageRepo.findByImageName(name);
-        return ImageUtility.decompressImage(dbImage.get().getImageDate());
+    public byte[] getImageDataById(long id) {
+        Image image = imageRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Image not found"));
+        return ImageUtility.decompressImage(image.getImageDate());
     }
 }

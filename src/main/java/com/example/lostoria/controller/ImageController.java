@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/images")
@@ -29,32 +28,32 @@ public class ImageController {
 
     @PostMapping("/upload/lost/{lostItemId}")
     public ResponseEntity<String> uploadImageForLostItem(@PathVariable long lostItemId, @RequestParam("image") MultipartFile imageFile) throws IOException {
-        Optional<LostItem> lostItemOpt = Optional.ofNullable(lostItemService.getById(lostItemId));
-        if (!lostItemOpt.isPresent()){
+        LostItem lostItem = lostItemService.getById(lostItemId);
+        if (lostItem == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lost item not found");
         }
-        imageService.saveImage(imageFile, lostItemOpt.get(), null);
+        imageService.saveImage(imageFile, lostItem, null);
         return ResponseEntity.status(HttpStatus.OK).body("Image uploaded successfully");
     }
     @PostMapping("/upload/found/{foundItemId}")
     public ResponseEntity<String> uploadImageForFoundItem(@PathVariable long foundItemId, @RequestParam("image") MultipartFile imageFile) throws IOException {
-        Optional<FoundItem> foundItemOpt = Optional.ofNullable(foundItemService.getById(foundItemId));
-        if (!foundItemOpt.isPresent()){
+        FoundItem foundItem = foundItemService.getById(foundItemId);
+        if (foundItem == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No items found");
         }
-        imageService.saveImage(imageFile,null, foundItemOpt.get());
+        imageService.saveImage(imageFile, null, foundItem);
         return ResponseEntity.status(HttpStatus.OK).body("Image uploaded successfully");
     }
 
-    @GetMapping("/view/{imageName}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws IOException {
-        Optional<Image> imageOpt = imageService.getImageByName(imageName);
-        if (!imageOpt.isPresent()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        byte[] imageData = imageService.getImageData(imageName);
-        return ResponseEntity.ok()
-                .contentType(MediaType.valueOf(imageOpt.get().getType()))
-                .body(imageData);
+    @GetMapping("/view/id/{imageId}")
+    public ResponseEntity<byte[]> getImageById(@PathVariable long imageId) {
+        return imageService.getImageById(imageId)
+                .map(image -> {
+                    byte[] data = imageService.getImageDataById(imageId);
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.valueOf(image.getType()))
+                            .body(data);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }
