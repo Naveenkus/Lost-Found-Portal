@@ -2,7 +2,9 @@ package com.example.lostoria.controller;
 
 import com.example.lostoria.exception.GlobalExceptionHandler;
 import com.example.lostoria.model.LostItem;
+import com.example.lostoria.service.FoundItemService;
 import com.example.lostoria.service.LostItemService;
+import com.example.lostoria.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,20 +74,38 @@ class GlobalExceptionHandlerTest {
         public void throwIllegalArgument() {
             throw new IllegalArgumentException("Invalid argument provided for search");
         }
+
+        @PostMapping("/service-save-violation")
+        public void simulateServiceLayerSaveViolation() {
+            jakarta.validation.Validator validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
+            LostItem invalidItem = new LostItem();
+            invalidItem.setTitle(null); // triggers @NotBlank
+            invalidItem.setLocationLost(null); // triggers @NotBlank
+            java.util.Set<jakarta.validation.ConstraintViolation<LostItem>> violations = validator.validate(invalidItem);
+            throw new jakarta.validation.ConstraintViolationException(violations);
+        }
     }
 
     private MockMvc mockMvc;
 
     @Mock
     private LostItemService lostItemService;
+    @Mock
+    private FoundItemService foundItemService;
+    @Mock
+    private com.example.lostoria.service.UserService userService;
 
     @InjectMocks
     private LostItemController lostItemController;
+    @InjectMocks
+    private FoundItemController foundItemController;
+    @InjectMocks
+    private AuthController authController;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(lostItemController, new TestErrorController())
+                .standaloneSetup(lostItemController, foundItemController, authController, new TestErrorController())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -183,5 +203,91 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error").value("Bad Request"))
                 .andExpect(jsonPath("$.message").value("Invalid argument provided for search"))
                 .andExpect(jsonPath("$.path").value("/test/errors/illegal-argument"));
+    }
+
+    @Test
+    void testRegister_blankUserFields_returns400WithFieldErrors() throws Exception {
+        String invalidUserJson = """
+                {
+                    "username": "",
+                    "email": "not-an-email",
+                    "password": "123"
+                }
+                """;
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidUserJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.path").value("/api/auth/register"))
+                .andExpect(jsonPath("$.errors.username").exists())
+                .andExpect(jsonPath("$.errors.email").exists())
+                .andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void testLostItemMultipartCreate_blankTitleLocation_returns400WithFieldErrors() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart("/api/lost-items")
+                        .param("title", "")
+                        .param("locationLost", "")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.path").value("/api/lost-items"))
+                .andExpect(jsonPath("$.errors.title").exists())
+                .andExpect(jsonPath("$.errors.locationLost").exists());
+    }
+
+    @Test
+    void testLostItemJsonUpdate_blankTitle_returns400WithFieldErrors() throws Exception {
+        String invalidLostItemJson = """
+                {
+                    "title": "",
+                    "locationLost": "Library"
+                }
+                """;
+
+        mockMvc.perform(put("/api/lost-items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidLostItemJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.path").value("/api/lost-items/1"))
+                .andExpect(jsonPath("$.errors.title").exists());
+    }
+
+    @Test
+    void testFoundItemJsonCreate_blankLocationFound_returns400WithFieldErrors() throws Exception {
+        String invalidFoundItemJson = """
+                {
+                    "title": "Keys",
+                    "locationFound": ""
+                }
+                """;
+
+        mockMvc.perform(post("/api/found-items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidFoundItemJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.path").value("/api/found-items"))
+                .andExpect(jsonPath("$.errors.locationFound").exists());
+    }
+
+    @Test
+    void testConstraintViolationException_directServiceSave_returns400WithEnvelope() throws Exception {
+        mockMvc.perform(post("/test/errors/service-save-violation"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.path").value("/test/errors/service-save-violation"))
+                .andExpect(jsonPath("$.errors.title").value("Title is required"))
+                .andExpect(jsonPath("$.errors.locationLost").value("Location lost is required"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 }

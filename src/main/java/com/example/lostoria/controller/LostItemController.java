@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,14 +36,14 @@ public class LostItemController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LostItem> create(
-            @ModelAttribute LostItem lostItem,
+            @Valid @ModelAttribute LostItem lostItem,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) throws IOException {
 
         return new ResponseEntity<>(lostItemService.create(lostItem, imageFile), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable long id, @RequestBody LostItem lostItem){
+    public ResponseEntity<String> update(@PathVariable long id, @Valid @RequestBody LostItem lostItem){
         try {
             LostItem updated = lostItemService.update(id, lostItem);
             return new ResponseEntity<>("Updated", HttpStatus.OK);

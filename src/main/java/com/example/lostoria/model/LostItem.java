@@ -1,6 +1,8 @@
 package com.example.lostoria.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +21,21 @@ public class LostItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Title is required")
+    @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters")
     private String title;
+
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
+    @NotBlank(message = "Location lost is required")
+    @Size(min = 2, max = 150, message = "Location must be between 2 and 150 characters")
     private String locationLost;
+
+    @Size(max = 50, message = "Status cannot exceed 50 characters")
     private String status;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime datelost;
     private LocalDateTime createdAt;

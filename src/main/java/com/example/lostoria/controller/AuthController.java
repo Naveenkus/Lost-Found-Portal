@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.Map;
 
 @RestController
@@ -20,7 +21,7 @@ public class AuthController {
 
     //---------COMMON USER---------//
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user){
+    public ResponseEntity<?> register(@Valid @RequestBody User user){
         User createdUser = userService.registerUser(user);
         createdUser.setPassword(null); // Never leak password in response
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
