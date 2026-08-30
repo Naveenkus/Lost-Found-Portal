@@ -103,6 +103,16 @@ function App() {
     });
   }
 
+  const handleDeleteSuccess = (deletedId, type) => {
+    if (type === 'LOST') {
+      setLostItems(prev => prev.filter(item => item.id !== deletedId));
+    } else {
+      setFoundItems(prev => prev.filter(item => item.id !== deletedId));
+    }
+    setSelectedItem(null);
+    showToast('Item deleted successfully.');
+  };
+
   return (
     <div className="app-container">
       {/* Toast Banner */}
@@ -211,7 +221,9 @@ function App() {
         <ItemModal
           item={selectedItem}
           type={selectedItemType}
+          currentUser={currentUser}
           onClose={() => setSelectedItem(null)}
+          onDeleteSuccess={handleDeleteSuccess}
         />
       )}
 

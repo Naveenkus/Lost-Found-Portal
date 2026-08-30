@@ -1,8 +1,11 @@
-import React from 'react';
-import { X, MapPin, Calendar, Image as ImageIcon, ShieldCheck, Tag } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, MapPin, Calendar, Image as ImageIcon, ShieldCheck, Tag, Trash2, Loader2 } from 'lucide-react';
 import { api } from '../api';
 
-export default function ItemModal({ item, type, onClose }) {
+export default function ItemModal({ item, type, currentUser, onClose, onDeleteSuccess }) {
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   if (!item) return null;
 
   const isLost = type === 'LOST';
@@ -19,6 +22,38 @@ export default function ItemModal({ item, type, onClose }) {
   const imageUrl = imageId ? api.getImageUrl(imageId) : null;
   const dateValue = isLost ? (item.datelost || item.createdAt) : (item.dateFound || item.createdAt);
   const locationText = isLost ? item.locationLost : item.locationFound;
+
+  // Ownership & Admin check
+  const isOwner = Boolean(
+    currentUser &&
+    item.reportedBy &&
+    currentUser.id === item.reportedBy.id
+  );
+  const isAdmin = Boolean(currentUser && currentUser.role === 'ADMIN');
+  const canDelete = isOwner || isAdmin;
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      if (isLost) {
+        await api.deleteLostItem(item.id);
+      } else {
+        await api.deleteFoundItem(item.id);
+      }
+      if (onDeleteSuccess) {
+        onDeleteSuccess(item.id, type);
+      }
+    } catch (err) {
+      console.error(err);
+      setDeleteError(err.message || 'Failed to delete item. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -96,6 +131,27 @@ export default function ItemModal({ item, type, onClose }) {
                 To claim or submit proof of ownership for this item, please visit the campus security office or contact the portal administrator with Reference #{item.id}.
               </p>
             </div>
+
+            {/* Owner / Admin Action Controls */}
+            {canDelete && (
+              <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                  <span>{deleting ? 'Deleting...' : 'Delete Item'}</span>
+                </button>
+              </div>
+            )}
+
+            {deleteError && (
+              <div className="form-error-banner" style={{ marginTop: '16px' }}>
+                {deleteError}
+              </div>
+            )}
           </div>
         </div>
       </div>

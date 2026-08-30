@@ -22,7 +22,7 @@ export default function AuthModal({ onClose, onSuccess }) {
         const res = await api.login(username, password);
         if (res.token) {
           setAuthToken(res.token);
-          const userObj = { username: username };
+          const userObj = res.user || { username: username };
           setStoredUser(userObj);
           onSuccess(userObj);
           onClose();
@@ -43,7 +43,7 @@ export default function AuthModal({ onClose, onSuccess }) {
         const loginRes = await api.login(username, password);
         if (loginRes.token) {
           setAuthToken(loginRes.token);
-          const userObj = { username, email };
+          const userObj = loginRes.user || { username, email };
           setStoredUser(userObj);
           onSuccess(userObj);
           setTimeout(() => onClose(), 600);

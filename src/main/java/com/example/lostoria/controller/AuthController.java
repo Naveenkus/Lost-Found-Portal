@@ -30,10 +30,20 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody User loginRequest){
         String token = userService.verify(loginRequest);
         if (!"fail".equals(token) && token != null) {
-            return ResponseEntity.ok(Map.of(
-                "token", token,
-                "message", "Login successful"
-            ));
+            String identifier = loginRequest.getUsername() != null && !loginRequest.getUsername().trim().isEmpty()
+                    ? loginRequest.getUsername().trim()
+                    : (loginRequest.getEmail() != null ? loginRequest.getEmail().trim() : "");
+            User authenticatedUser = userService.findByUsername(identifier)
+                    .or(() -> userService.findByEmail(identifier))
+                    .orElse(null);
+
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("token", token);
+            response.put("message", "Login successful");
+            if (authenticatedUser != null) {
+                response.put("user", authenticatedUser);
+            }
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                 "message", "Invalid username/email or password"

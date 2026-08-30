@@ -5,6 +5,7 @@ export const getAuthToken = () => localStorage.getItem('lostoria_token');
 export const setAuthToken = (token) => localStorage.setItem('lostoria_token', token);
 export const removeAuthToken = () => localStorage.removeItem('lostoria_token');
 
+// Stale localStorage cached entries pre-dating this fix only have { username }; re-login populates full id and role.
 export const getStoredUser = () => {
   const user = localStorage.getItem('lostoria_user');
   return user ? JSON.parse(user) : null;
@@ -74,7 +75,12 @@ export const api = {
       method: 'DELETE',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to delete item');
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      const err = new Error(msg || 'Failed to delete item');
+      err.status = res.status;
+      throw err;
+    }
     return res;
   },
 
@@ -100,7 +106,12 @@ export const api = {
       method: 'DELETE',
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error('Failed to delete item');
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      const err = new Error(msg || 'Failed to delete item');
+      err.status = res.status;
+      throw err;
+    }
     return res;
   },
 
