@@ -1,5 +1,6 @@
 package com.example.lostoria.service;
 
+import com.example.lostoria.dto.UserPrincipal;
 import com.example.lostoria.model.FoundItem;
 import com.example.lostoria.model.Image;
 import com.example.lostoria.repository.FoundItemRepository;
@@ -7,6 +8,8 @@ import com.example.lostoria.repository.ImageRepository;
 import com.example.lostoria.util.ImageUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +40,10 @@ public class FoundItemService {
         if (foundItem.getCreatedAt() == null) {
             foundItem.setCreatedAt(LocalDateTime.now());
         }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            foundItem.setReportedBy(userPrincipal.getUser());
+        }
         return foundItemRepository.save(foundItem);
     }
 
@@ -44,6 +51,10 @@ public class FoundItemService {
     public FoundItem create(FoundItem foundItem, MultipartFile imageFile) throws IOException {
         if (foundItem.getCreatedAt() == null) {
             foundItem.setCreatedAt(LocalDateTime.now());
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            foundItem.setReportedBy(userPrincipal.getUser());
         }
         FoundItem savedItem = foundItemRepository.save(foundItem);
         if (imageFile != null && !imageFile.isEmpty()) {

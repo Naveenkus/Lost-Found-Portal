@@ -1,5 +1,6 @@
 package com.example.lostoria.service;
 
+import com.example.lostoria.dto.UserPrincipal;
 import com.example.lostoria.model.Image;
 import com.example.lostoria.model.LostItem;
 import com.example.lostoria.repository.ImageRepository;
@@ -7,6 +8,8 @@ import com.example.lostoria.repository.LostItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +41,10 @@ public class LostItemService {
     public LostItem create(LostItem lostItem, MultipartFile imageFile) throws IOException {
         if (lostItem.getCreatedAt() == null) {
             lostItem.setCreatedAt(LocalDateTime.now());
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal userPrincipal) {
+            lostItem.setReportedBy(userPrincipal.getUser());
         }
         LostItem savedItem = lostItemRepository.save(lostItem);
 
