@@ -4,6 +4,7 @@ import HeroBanner from './components/HeroBanner';
 import ItemCard from './components/ItemCard';
 import ItemModal from './components/ItemModal';
 import ReportModal from './components/ReportModal';
+import EditModal from './components/EditModal';
 import AuthModal from './components/AuthModal';
 import { api, getStoredUser, removeAuthToken, removeStoredUser } from './api';
 import { Loader2, Search, PlusCircle, RefreshCw } from 'lucide-react';
@@ -21,6 +22,8 @@ function App() {
   // Modals state
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState('LOST');
+  const [editingItem, setEditingItem] = useState(null);
+  const [editingItemType, setEditingItemType] = useState('LOST');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportDefaultType, setReportDefaultType] = useState('LOST');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -111,6 +114,16 @@ function App() {
     }
     setSelectedItem(null);
     showToast('Item deleted successfully.');
+  };
+
+  const handleEditSuccess = (updatedItem, type) => {
+    if (type === 'LOST') {
+      setLostItems(prev => prev.map(item => item.id === updatedItem.id ? { ...item, ...updatedItem } : item));
+    } else {
+      setFoundItems(prev => prev.map(item => item.id === updatedItem.id ? { ...item, ...updatedItem } : item));
+    }
+    setEditingItem(null);
+    showToast('Item updated successfully!');
   };
 
   return (
@@ -224,6 +237,25 @@ function App() {
           currentUser={currentUser}
           onClose={() => setSelectedItem(null)}
           onDeleteSuccess={handleDeleteSuccess}
+          onOpenEdit={(item, type) => {
+            setSelectedItem(null);
+            setEditingItem(item);
+            setEditingItemType(type);
+          }}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editingItem && (
+        <EditModal
+          item={editingItem}
+          type={editingItemType}
+          onClose={() => setEditingItem(null)}
+          onSuccess={handleEditSuccess}
+          onRequireAuth={() => {
+            setEditingItem(null);
+            setIsAuthOpen(true);
+          }}
         />
       )}
 

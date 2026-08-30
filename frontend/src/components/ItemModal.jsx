@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, MapPin, Calendar, Image as ImageIcon, ShieldCheck, Tag, Trash2, Loader2 } from 'lucide-react';
+import { X, MapPin, Calendar, Image as ImageIcon, ShieldCheck, Tag, Trash2, Edit3, Loader2 } from 'lucide-react';
 import { api } from '../api';
 
-export default function ItemModal({ item, type, currentUser, onClose, onDeleteSuccess }) {
+export default function ItemModal({ item, type, currentUser, onClose, onDeleteSuccess, onOpenEdit }) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
@@ -30,7 +30,7 @@ export default function ItemModal({ item, type, currentUser, onClose, onDeleteSu
     currentUser.id === item.reportedBy.id
   );
   const isAdmin = Boolean(currentUser && currentUser.role === 'ADMIN');
-  const canDelete = isOwner || isAdmin;
+  const canEdit = isOwner || isAdmin;
 
   const handleDelete = async () => {
     const confirmed = window.confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`);
@@ -133,8 +133,16 @@ export default function ItemModal({ item, type, currentUser, onClose, onDeleteSu
             </div>
 
             {/* Owner / Admin Action Controls */}
-            {canDelete && (
+            {canEdit && (
               <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => onOpenEdit && onOpenEdit(item, type)}
+                >
+                  <Edit3 size={16} />
+                  <span>Edit Item</span>
+                </button>
                 <button
                   type="button"
                   className="btn btn-danger"

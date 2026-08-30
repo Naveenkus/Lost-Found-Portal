@@ -70,6 +70,21 @@ export const api = {
     return res.json();
   },
 
+  async updateLostItem(id, data) {
+    const res = await fetch(`${API_BASE}/lost-items/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      const err = new Error(msg || 'Failed to update item');
+      err.status = res.status;
+      throw err;
+    }
+    return res;
+  },
+
   async deleteLostItem(id) {
     const res = await fetch(`${API_BASE}/lost-items/${id}`, {
       method: 'DELETE',
@@ -99,6 +114,21 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to post found item');
     return res.json();
+  },
+
+  async updateFoundItem(id, data) {
+    const res = await fetch(`${API_BASE}/found-items/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(() => '');
+      const err = new Error(msg || 'Failed to update item');
+      err.status = res.status;
+      throw err;
+    }
+    return res;
   },
 
   async deleteFoundItem(id) {
