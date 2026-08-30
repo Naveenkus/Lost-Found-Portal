@@ -31,6 +31,10 @@ public class FoundItem {
     @OneToMany(mappedBy = "foundItem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Image> images = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User reportedBy;
+
     public Long getId() {
         return id;
     }
@@ -93,5 +97,13 @@ public class FoundItem {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public User getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(User reportedBy) {
+        this.reportedBy = reportedBy;
     }
 }

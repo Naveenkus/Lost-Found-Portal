@@ -28,6 +28,9 @@ public class LostItem {
     private LocalDateTime createdAt;
     @OneToOne(mappedBy = "lostItem", cascade = CascadeType.ALL)
     private Image images;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User reportedBy;
 
     public Long getId() {
         return id;
@@ -91,5 +94,13 @@ public class LostItem {
 
     public void setImages(Image images) {
         this.images = images;
+    }
+
+    public User getReportedBy() {
+        return reportedBy;
+    }
+
+    public void setReportedBy(User reportedBy) {
+        this.reportedBy = reportedBy;
     }
 }
