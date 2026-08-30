@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -41,19 +43,20 @@ public class LostItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable long id, @RequestBody LostItem lostItem){
-        LostItem updated = lostItemService.update(id, lostItem);
-        if (updated != null){
+        try {
+            LostItem updated = lostItemService.update(id, lostItem);
             return new ResponseEntity<>("Updated", HttpStatus.OK);
-        }else
-            return new ResponseEntity<>("Failed to update", HttpStatus.BAD_REQUEST);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable long id){
-        LostItem lostItem = lostItemService.getById(id);
-        if (lostItem != null) {
+        try {
             lostItemService.delete(id);
             return new ResponseEntity<>("Deleted", HttpStatus.OK);
-        }else
-            return new ResponseEntity<>("Item not found", HttpStatus.NOT_FOUND);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
     }
 }

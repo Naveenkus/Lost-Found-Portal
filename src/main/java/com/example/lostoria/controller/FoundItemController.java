@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -46,20 +48,21 @@ public class FoundItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable long id, @RequestBody FoundItem foundItem){
-        FoundItem updated = foundItemService.update(id, foundItem);
-        if (updated != null)
+        try {
+            FoundItem updated = foundItemService.update(id, foundItem);
             return new ResponseEntity<>("Updated", HttpStatus.OK);
-        else
-            return new ResponseEntity<>("Failed to update", HttpStatus.BAD_REQUEST);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable long id){
-        FoundItem foundItem = foundItemService.getById(id);
-        if (foundItem != null){
+        try {
             foundItemService.delete(id);
             return new ResponseEntity<>("Deleted", HttpStatus.OK);
-        }else
-            return new ResponseEntity<>("Item not found", HttpStatus.NOT_FOUND);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
     }
 
 }
