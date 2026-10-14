@@ -27,5 +27,5 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress clean verify
 
       - name: Build Docker image
-        run: docker build --plarform linux/amd64 -t lostoria:ci .
+        run: docker build --platform linux/amd64 -t lostoria:ci .
 
