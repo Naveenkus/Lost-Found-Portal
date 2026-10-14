@@ -2,7 +2,7 @@
 
 **A full-stack web platform for reporting, tracking, and recovering lost and found items in campus and community environments.**
 
-[![CI](https://github.com/Naveenkus/Lost-Found-Portal/actions/workflows/ci.yml/badge.svg)](https://github.com/Naveenkus/Lost-Found-Portal/actions/workflows/ci.yml)
+[![CI](https://github.com/Naveenkus/Lost-Found-Portal/actions/workflows/lostoria-ci.yml/badge.svg)](https://github.com/Naveenkus/Lost-Found-Portal/actions/workflows/lostoria-ci.yml)
 [![Java 21](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot 3.4.5](https://img.shields.io/badge/Spring_Boot-3.4.5-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-316192?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
