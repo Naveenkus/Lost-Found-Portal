@@ -3,7 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request: [main]
+  pull_request:
+    branches: [ main]
 
 
 jobs:
@@ -27,3 +28,4 @@ jobs:
 
       - name: Build Docker image
         run: docker build --plarform linux/amd64 -t lostoria:ci .
+
