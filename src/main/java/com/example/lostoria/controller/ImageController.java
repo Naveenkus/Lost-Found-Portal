@@ -1,7 +1,7 @@
 package com.example.lostoria.controller;
 
+import com.example.lostoria.dto.ImageCacheDto;
 import com.example.lostoria.model.FoundItem;
-import com.example.lostoria.model.Image;
 import com.example.lostoria.model.LostItem;
 import com.example.lostoria.service.FoundItemService;
 import com.example.lostoria.service.ImageService;
@@ -47,13 +47,9 @@ public class ImageController {
 
     @GetMapping("/view/id/{imageId}")
     public ResponseEntity<byte[]> getImageById(@PathVariable long imageId) {
-        return imageService.getImageById(imageId)
-                .map(image -> {
-                    byte[] data = imageService.getImageDataById(imageId);
-                    return ResponseEntity.ok()
-                            .contentType(MediaType.valueOf(image.getType()))
-                            .body(data);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ImageCacheDto cached = imageService.getCachedImage(imageId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.valueOf(cached.getContentType()))
+                .body(cached.getData());
     }
 }

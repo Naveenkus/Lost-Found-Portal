@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.context.annotation.Bean;
@@ -26,13 +27,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableAutoConfiguration
+@EnableCaching
 public class RedisConfig implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(RedisConfig.class);
 
-    @Bean
-    public ObjectMapper redisObjectMapper() {
+
+    private ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.activateDefaultTyping(
@@ -44,8 +45,8 @@ public class RedisConfig implements CachingConfigurer {
     }
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10))
                 .disableCachingNullValues()
@@ -67,12 +68,14 @@ public class RedisConfig implements CachingConfigurer {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper){
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory){
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
+
         template.setValueSerializer(jsonSerializer);
         template.setHashValueSerializer(jsonSerializer);
         template.afterPropertiesSet();
