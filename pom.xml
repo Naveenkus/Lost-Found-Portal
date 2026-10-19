@@ -89,6 +89,26 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Spring Data Redis: Lettuce client, RedisTemplate, CacheManager -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- Commons Pool 2: Required for Lettuce connection pooling (spring.data.redis.lettuce.pool.*) -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+
+		<!-- Testcontainers Redis: For isolated, reproducible integration tests -->
+		<dependency>
+			<groupId>com.redis</groupId>
+			<artifactId>testcontainers-redis</artifactId>
+			<version>2.2.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

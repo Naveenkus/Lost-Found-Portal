@@ -4,6 +4,7 @@ import com.example.lostoria.model.User;
 import com.example.lostoria.dto.UserPrincipal;
 import com.example.lostoria.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +18,7 @@ public class MyUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
+    @Cacheable(value = "users:auth", key = "#identifier")
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(identifier);
         if (!user.isPresent()){

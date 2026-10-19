@@ -1,8 +1,12 @@
 package com.example.lostoria.controller;
 
 import com.example.lostoria.model.User;
+import com.example.lostoria.service.JWTService;
 import com.example.lostoria.service.UserService;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -18,6 +24,12 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private UserService userService;
+
+    @Autowired(required = false)
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private JWTService jwtService;
 
     //---------COMMON USER---------//
     @PostMapping("/register")
@@ -50,5 +62,18 @@ public class AuthController {
                 "message", "Invalid username/email or password"
             ));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout (HttpServletRequest request){
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer") && stringRedisTemplate != null) {
+            String token = authHeader.substring(7);
+            long remaining  = jwtService.getRemainingExpirationMillis(token);
+            if (remaining > 0) {
+                stringRedisTemplate.opsForValue().set("blacklist:" + token, "revoked", Duration.ofMillis(remaining));
+            }
+        }
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 }

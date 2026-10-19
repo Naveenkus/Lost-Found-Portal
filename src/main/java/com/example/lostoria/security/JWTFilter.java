@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -22,6 +23,9 @@ public class JWTFilter extends OncePerRequestFilter {
     private JWTService jwtService;
     @Autowired
     ApplicationContext context;
+
+    @Autowired(required = false)
+    private StringRedisTemplate stringredisTemplate;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -32,6 +36,19 @@ public class JWTFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")){
             token = authHeader.substring(7);
             identifier = jwtService.extractUserName(token);
+        }
+
+        if (token != null && stringredisTemplate != null) {
+            try {
+                Boolean isBlacklistec = stringredisTemplate.hasKey("blacklist:" + token);
+                if (Boolean.TRUE.equals(isBlacklistec)){
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Token has been invalidated by logout\"}");
+                    return;
+                }
+            } catch (Exception e){
+
+            }
         }
 
         if (identifier != null && SecurityContextHolder.getContext().getAuthentication() == null){

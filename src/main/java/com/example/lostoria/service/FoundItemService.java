@@ -9,6 +9,9 @@ import com.example.lostoria.util.ImageUtility;
 import com.example.lostoria.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,16 +32,20 @@ public class FoundItemService {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Cacheable(value = "found-items:all", key = "'all'")
     @Transactional(readOnly = true)
     public List<FoundItem> getAll() {
         return foundItemRepository.findAll();
     }
 
+    @Cacheable(value = "found-items:single", key = "#id")
     @Transactional(readOnly = true)
     public FoundItem getById(long id) {
         return foundItemRepository.findById(id).orElse(null);
     }
 
+    @CacheEvict(value = "found-items:all", key = "'all'")
+    @Transactional
     public FoundItem create(FoundItem foundItem) {
         if (foundItem.getCreatedAt() == null) {
             foundItem.setCreatedAt(LocalDateTime.now());
@@ -50,6 +57,7 @@ public class FoundItemService {
         return foundItemRepository.save(foundItem);
     }
 
+    @CacheEvict(value = "found-items:all", key = "'all'")
     @Transactional
     public FoundItem create(FoundItem foundItem, MultipartFile imageFile) throws IOException {
         if (foundItem.getCreatedAt() == null) {
@@ -89,6 +97,11 @@ public class FoundItemService {
         }
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "found-items:all", key = "'all'"),
+            @CacheEvict(value = "found-items:single", key = "#id")
+    })
+    @Transactional
     public FoundItem update(long id, FoundItem newData) {
         FoundItem item = foundItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Found Item not found"));
@@ -103,6 +116,11 @@ public class FoundItemService {
         return foundItemRepository.save(item);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "found-items:all", key = "'all'"),
+            @CacheEvict(value = "found-items:single", key = "#id")
+    })
+    @Transactional
     public void delete(long id) {
         FoundItem item = foundItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Found Item not found"));

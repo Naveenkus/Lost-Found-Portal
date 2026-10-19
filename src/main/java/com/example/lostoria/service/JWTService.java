@@ -79,4 +79,9 @@ public class JWTService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
+    public long getRemainingExpirationMillis(String token) {
+        Date expiration = extractExpiration(token);
+        return Math.max(0, expiration.getTime() - System.currentTimeMillis());
+    }
 }
