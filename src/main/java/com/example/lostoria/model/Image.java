@@ -20,6 +20,7 @@ public class Image {
     private String imageName;
     private String type;
     @Lob
+    @JsonIgnore
     private byte[] imageDate;
 
     @JsonIgnore

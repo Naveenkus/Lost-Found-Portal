@@ -1,11 +1,13 @@
 package com.example.lostoria.exception;
 
 import com.example.lostoria.dto.ErrorResponse;
+import io.lettuce.core.RedisConnectionException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -292,5 +294,21 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler({
+            RedisConnectionFailureException.class,
+            RedisConnectionException.class
+    })
+    public ResponseEntity<ErrorResponse> handleRedisConnectionFailure(Exception e, HttpServletRequest request) {
+        log.error("Redis infrastructure failure: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+                .message("Caching service temporarily unavailable. System running in degraded mode.")
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 }

@@ -4,6 +4,7 @@ import com.example.lostoria.model.User;
 import com.example.lostoria.repository.UserRepository;
 import com.example.lostoria.util.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,6 +45,7 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @CacheEvict(value = "users:auth", allEntries = true)
     public User updateUser(long id, User updated) {
         return userRepository.findById(id).map(user -> {
             user.setUsername(updated.getUsername());
@@ -53,6 +55,7 @@ public class UserService {
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @CacheEvict(value = "users:auth", allEntries = true)
     public void deleteUser(long id) {
         userRepository.deleteById(id);
     }

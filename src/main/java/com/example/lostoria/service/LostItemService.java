@@ -8,6 +8,9 @@ import com.example.lostoria.repository.LostItemRepository;
 import com.example.lostoria.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,16 +33,19 @@ public class LostItemService {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Cacheable(value = "lost-items:all", key = "'all'")
     @Transactional(readOnly = true)
     public List<LostItem> getAll() {
         return lostItemRepository.findAll();
     }
 
+    @Cacheable(value = "lost-items:single", key = "#id")
     @Transactional(readOnly = true)
     public LostItem getById(Long id) {
         return lostItemRepository.findById(id).orElse(null);
     }
 
+    @CacheEvict(value = "lost-items:all", key = "'all'")
     @Transactional
     public LostItem create(LostItem lostItem, MultipartFile imageFile) throws IOException {
         if (lostItem.getCreatedAt() == null) {
@@ -80,6 +86,11 @@ public class LostItemService {
         }
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "lost-items:all", key = "'all'"),
+            @CacheEvict(value = "lost-items:single", key = "#id")
+    })
+    @Transactional
     public LostItem update(long id, LostItem newData) {
         LostItem item = lostItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lost Item not found"));
@@ -93,6 +104,11 @@ public class LostItemService {
         return lostItemRepository.save(item);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "lost-items:all", key = "'all'"),
+            @CacheEvict(value = "lost-items:single", key = "#id")
+    })
+    @Transactional
     public void delete(long id) {
         LostItem item = lostItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lost Item not found"));
